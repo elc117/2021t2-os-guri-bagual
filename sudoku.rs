@@ -95,8 +95,8 @@ fn block(line: i8, column: i8) -> i8
 fn valid_block(lines: &mut [[i8; 9]; 9], block: i8) -> bool            //Se tiver numeros repetidos no bloco retorna falso
 {
     let mut numbers: LinkedList<i8> = LinkedList::new();
-    let mut line: usize = 3 * (block % 3) as usize;
-    let mut column: usize = 3 * (block / 3) as usize;
+    let line: usize = 3 * (block % 3) as usize;
+    let column: usize = 3 * (block / 3) as usize;
     for x in line..(line+3)
     {
         for y in column..(column+3)
@@ -114,7 +114,7 @@ fn valid_block(lines: &mut [[i8; 9]; 9], block: i8) -> bool            //Se tive
     return true;
 }
 
-fn find_empty_square(lines: &mut [[i8; 9]; 9], original_lines: [[i8;9]; 9]) -> (usize,usize)
+fn find_empty_square(lines: &mut [[i8; 9]; 9]) -> (usize,usize)
 {
     for x in 0..9
     {
@@ -135,8 +135,8 @@ fn insert_number(lines: &mut [[i8; 9]; 9], (x,y): (usize,usize), movements: &mut
     for insertion in (number+1)..10      //Insere um numero de 1 a 9
     {
         lines[x][y] = insertion;
-        println!("{} {}", x,y);
         show_table(lines);
+        println!("############################################################");
         if valid_line(lines, x)
         {
             if valid_column(lines, y)
@@ -158,11 +158,11 @@ fn modify_number(lines: &mut [[i8; 9]; 9], movements: &mut Vec<i8>) -> bool
 {
     if movements.len() == 0
     {
-        println!("eioa");
         return false;
     }
     let y = movements.pop().unwrap();
     let x = movements.pop().unwrap();
+    println!("MODIFICAR {},{}", x,y);
     if !insert_number(lines, (x as usize,y as usize), movements)
     {
         return modify_number(lines, movements);
@@ -170,27 +170,28 @@ fn modify_number(lines: &mut [[i8; 9]; 9], movements: &mut Vec<i8>) -> bool
     return true;
 }
 
-fn backtracking(lines: &mut [[i8; 9]; 9], original_lines: [[i8;9]; 9], movements: &mut Vec<i8>) -> bool
+fn backtracking(lines: &mut [[i8; 9]; 9], movements: &mut Vec<i8>) -> bool
 {
-    let (x,y) = find_empty_square(lines, original_lines); // tuple = (x,y)
+    let (x,y) = find_empty_square(lines); // tuple = (x,y)
     if x == 10
     {
+        println!("Resolvido");
         return true;
     }
     if !insert_number(lines, (x,y), movements)
     {
         if !modify_number(lines, movements)
         {
+            println!("Impossivel resolver");
             return false;
         }
     }
-    return backtracking(lines, original_lines, movements);
+    return backtracking(lines, movements);
 }
 
 fn main()
 {
-    let mut lines: [[i8; 9]; 9] = [[0;9];9]; //9 Arrays de 9 elementos com inteiros de 8 bits, já que só usaremos numeros de 0 a 9
-    let mut table: [[i8; 9]; 9] = [[0;9];9]; //A tabela inicial para sabermos qual quadrado o programa nao pode alterar
+    let mut table: [[i8; 9]; 9] = [[0;9];9];    //9 Arrays de 9 elementos com inteiros de 8 bits, já que só usaremos numeros de 0 a 9
     let mut stack: Vec<i8> = Vec::new();
     table[0][2] = 7;
     table[0][3] = 6;
@@ -222,7 +223,6 @@ fn main()
     table[8][2] = 9;
     table[8][5] = 8;
     table[8][6] = 2;
-    lines = table;
-    backtracking(&mut lines, table, &mut stack);
-    //show_table(&mut lines);
+    backtracking(&mut table, &mut stack);
+    //show_table(&mut table);
 }
